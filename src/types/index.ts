@@ -1,10 +1,4 @@
-export type PaymentMethod =
-  | "dinheiro"
-  | "pix"
-  | "debito"
-  | "credito"
-  | "boleto"
-  | "outro";
+export type PaymentMethod = "dinheiro" | "pix" | "debito" | "credito" | "boleto" | "outro";
 
 export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   dinheiro: "Dinheiro",
