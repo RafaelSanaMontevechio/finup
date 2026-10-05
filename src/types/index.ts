@@ -31,6 +31,10 @@ export interface Expense {
   paymentMethod: PaymentMethod;
   amount: number;
   notes?: string;
+  installmentGroupId?: string;
+  installmentNumber?: number; // 1-based
+  installmentTotal?: number;
+  purchaseAmount?: number; // valor total da compra original
 }
 
 export interface Income {

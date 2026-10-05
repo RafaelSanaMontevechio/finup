@@ -22,6 +22,11 @@ export const expenseSchema = z.object({
   paymentMethod: paymentMethodEnum,
   amount: z.coerce.number().positive("Valor deve ser maior que zero"),
   notes: z.string().optional(),
+  // Número de parcelas. 1 = compra à vista (comportamento de sempre). Acima
+  // disso, o valor informado é tratado como o total da compra e o sistema
+  // gera uma parcela por mês. Só é relevante na criação — ignorado ao editar
+  // uma parcela já existente.
+  installments: z.coerce.number().int().min(1, "Mínimo 1").max(48, "Máximo 48").default(1),
 });
 export type ExpenseInput = z.infer<typeof expenseSchema>;
 

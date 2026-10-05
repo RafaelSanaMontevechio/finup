@@ -18,8 +18,7 @@ export async function withApiErrorHandling(
     return await handler();
   } catch (err) {
     console.error("[api] erro não tratado:", err);
-    const message =
-      err instanceof Error ? err.message : "Erro interno inesperado";
+    const message = err instanceof Error ? err.message : "Erro interno inesperado";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

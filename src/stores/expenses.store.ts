@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { Expense } from "@/types";
 import type { ExpenseInput } from "@/lib/validations/schemas";
 import { apiClient } from "@/lib/api/client";
+import { isArray } from "node:util";
 
 interface ExpensesState {
   items: Expense[];
@@ -11,6 +12,7 @@ interface ExpensesState {
   create: (input: ExpenseInput) => Promise<boolean>;
   update: (id: string, input: ExpenseInput) => Promise<boolean>;
   remove: (id: string) => Promise<boolean>;
+  removeInstallmentsFrom: (groupId: string, from: number) => Promise<boolean>;
 }
 
 export const useExpensesStore = create<ExpensesState>((set, get) => ({
@@ -34,10 +36,16 @@ export const useExpensesStore = create<ExpensesState>((set, get) => ({
   create: async (input) => {
     set({ error: null });
     try {
-      const created = await apiClient.post<Expense>("/api/expenses", input);
-      set({ items: [created, ...get().items] });
+      const created = await apiClient.post<Expense[]>("/api/expenses", input);
+
+      // O endpoint sempre retorna um array: 1 item para compra à vista, N
+      // para parcelada (uma por mês).
+      const newItems = Array.isArray(created) ? created : [created];
+
+      set({ items: [...newItems, ...get().items] });
       return true;
     } catch (err) {
+      console.log(err);
       set({ error: err instanceof Error ? err.message : "Erro ao criar gasto" });
       return false;
     }
@@ -65,6 +73,24 @@ export const useExpensesStore = create<ExpensesState>((set, get) => ({
       return true;
     } catch (err) {
       set({ error: err instanceof Error ? err.message : "Erro ao excluir gasto" });
+      return false;
+    }
+  },
+
+  removeInstallmentsFrom: async (groupId, from) => {
+    set({ error: null });
+    try {
+      await apiClient.delete(`/api/expenses?groupId=${groupId}&from=${from}`);
+      set({
+        items: get().items.filter(
+          (item) => !(item.installmentGroupId === groupId && (item.installmentNumber ?? 0) >= from)
+        ),
+      });
+      return true;
+    } catch (err) {
+      set({
+        error: err instanceof Error ? err.message : "Erro ao excluir parcelas",
+      });
       return false;
     }
   },

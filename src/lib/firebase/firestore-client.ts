@@ -24,6 +24,21 @@ export const firestoreClient = {
     return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Record<string, string>);
   },
 
+  // Consulta por igualdade em um segundo campo (ex: installmentGroupId).
+  // Só usa filtros `==`, então não exige índice composto no Firestore.
+  async listByField(
+    collection: CollectionName,
+    userId: string,
+    field: string,
+    value: string
+  ): Promise<Record<string, string>[]> {
+    const snapshot = await collectionRef(collection)
+      .where("userId", "==", userId)
+      .where(field, "==", value)
+      .get();
+    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Record<string, string>);
+  },
+
   async create(
     collection: CollectionName,
     userId: string,

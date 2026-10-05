@@ -12,15 +12,9 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -43,9 +37,16 @@ interface ExpenseTableProps {
   categories: Category[];
   onUpdate: (id: string, input: ExpenseInput) => Promise<boolean>;
   onDelete: (id: string) => Promise<boolean>;
+  onDeleteInstallmentsFrom: (groupId: string, from: number) => Promise<boolean>;
 }
 
-export function ExpenseTable({ expenses, categories, onUpdate, onDelete }: ExpenseTableProps) {
+export function ExpenseTable({
+  expenses,
+  categories,
+  onUpdate,
+  onDelete,
+  onDeleteInstallmentsFrom,
+}: ExpenseTableProps) {
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<Expense | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Expense | null>(null);
@@ -64,6 +65,9 @@ export function ExpenseTable({ expenses, categories, onUpdate, onDelete }: Expen
     }
     return ok;
   }
+
+  const isInstallment =
+    !!pendingDelete?.installmentGroupId && (pendingDelete.installmentTotal ?? 1) > 1;
 
   return (
     <>
@@ -89,7 +93,14 @@ export function ExpenseTable({ expenses, categories, onUpdate, onDelete }: Expen
           {paged.map((expense) => (
             <TableRow key={expense.id}>
               <TableCell>{formatDate(expense.date)}</TableCell>
-              <TableCell className="max-w-[220px] truncate">{expense.description}</TableCell>
+              <TableCell className="max-w-[220px] truncate">
+                <span>{expense.description}</span>
+                {expense.installmentTotal && expense.installmentTotal > 1 && (
+                  <Badge variant="secondary" className="ml-2 align-middle">
+                    {expense.installmentNumber}/{expense.installmentTotal}
+                  </Badge>
+                )}
+              </TableCell>
               <TableCell>
                 <Badge
                   variant="outline"
@@ -165,13 +176,38 @@ export function ExpenseTable({ expenses, categories, onUpdate, onDelete }: Expen
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir gasto?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. O lançamento "{pendingDelete?.description}" será
-              removido.
+              Esta ação não pode ser desfeita. O lançamento "{pendingDelete?.description}"
+              {isInstallment
+                ? ` (parcela ${pendingDelete?.installmentNumber}/${pendingDelete?.installmentTotal})`
+                : ""}{" "}
+              será removido.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end">
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
+            {isInstallment && (
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  if (pendingDelete?.installmentGroupId && pendingDelete.installmentNumber) {
+                    const ok = await onDeleteInstallmentsFrom(
+                      pendingDelete.installmentGroupId,
+                      pendingDelete.installmentNumber
+                    );
+                    toast(
+                      ok
+                        ? { title: "Parcelas futuras excluídas" }
+                        : { variant: "destructive", title: "Erro ao excluir parcelas" }
+                    );
+                  }
+                  setPendingDelete(null);
+                }}
+              >
+                Excluir esta e as futuras
+              </Button>
+            )}
+            <Button
+              variant="destructive"
               onClick={async () => {
                 if (pendingDelete) {
                   const ok = await onDelete(pendingDelete.id);
@@ -184,8 +220,8 @@ export function ExpenseTable({ expenses, categories, onUpdate, onDelete }: Expen
                 setPendingDelete(null);
               }}
             >
-              Excluir
-            </AlertDialogAction>
+              {isInstallment ? "Excluir apenas esta" : "Excluir"}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

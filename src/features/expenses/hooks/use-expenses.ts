@@ -19,16 +19,9 @@ const DEFAULT_FILTERS: ExpenseFilters = {
 };
 
 export function useExpenses() {
-  const { items, loading, error, refresh, create, update, remove } =
+  const { items, loading, error, refresh, create, update, remove, removeInstallmentsFrom } =
     useExpensesStore();
   const [filters, setFilters] = useState<ExpenseFilters>(DEFAULT_FILTERS);
-
-  useEffect(() => {
-    if (items.length === 0) {
-      refresh();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const filtered = useMemo(() => {
     let list = [...items];
@@ -36,9 +29,7 @@ export function useExpenses() {
     if (filters.search.trim()) {
       const q = filters.search.trim().toLowerCase();
       list = list.filter(
-        (e) =>
-          e.description.toLowerCase().includes(q) ||
-          (e.notes ?? "").toLowerCase().includes(q)
+        (e) => e.description.toLowerCase().includes(q) || (e.notes ?? "").toLowerCase().includes(q)
       );
     }
 
@@ -67,6 +58,13 @@ export function useExpenses() {
     return list;
   }, [items, filters]);
 
+  useEffect(() => {
+    if (items.length === 0) {
+      refresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return {
     expenses: filtered,
     allExpenses: items,
@@ -76,6 +74,7 @@ export function useExpenses() {
     create,
     update,
     remove,
+    removeInstallmentsFrom,
     filters,
     setFilters,
   };

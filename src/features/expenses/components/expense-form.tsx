@@ -17,6 +17,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { expenseSchema, type ExpenseInput } from "@/lib/validations/schemas";
 import { PAYMENT_METHOD_LABELS, type Expense, type Category } from "@/types";
+import { formatCurrency } from "@/lib/utils/format";
 import { toast } from "@/hooks/use-toast";
 
 interface ExpenseFormProps {
@@ -37,6 +38,7 @@ export function ExpenseForm({ categories, expense, onSubmit, onCancel }: Expense
     register,
     handleSubmit,
     control,
+    watch,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ExpenseInput>({
@@ -49,6 +51,7 @@ export function ExpenseForm({ categories, expense, onSubmit, onCancel }: Expense
           paymentMethod: expense.paymentMethod,
           amount: expense.amount,
           notes: expense.notes ?? "",
+          installments: 1,
         }
       : {
           date: todayISO(),
@@ -57,8 +60,31 @@ export function ExpenseForm({ categories, expense, onSubmit, onCancel }: Expense
           paymentMethod: "pix",
           amount: 0,
           notes: "",
+          installments: 1,
         },
   });
+
+  const paymentMethod = watch("paymentMethod");
+  const installments = watch("installments");
+  const amount = watch("amount");
+  const isNewCreditPurchase = !expense && paymentMethod === "credito";
+
+  async function handleFormSubmit(values: ExpenseInput) {
+    const ok = await onSubmit(values);
+
+    if (ok) {
+      toast({
+        title: expense
+          ? "Gasto atualizado"
+          : values.installments > 1
+            ? `Compra parcelada em ${values.installments}x criada`
+            : "Gasto criado com sucesso",
+      });
+      if (!expense) router.push("/expenses");
+    } else {
+      toast({ variant: "destructive", title: "Erro ao salvar gasto" });
+    }
+  }
 
   useEffect(() => {
     if (expense) {
@@ -69,23 +95,20 @@ export function ExpenseForm({ categories, expense, onSubmit, onCancel }: Expense
         paymentMethod: expense.paymentMethod,
         amount: expense.amount,
         notes: expense.notes ?? "",
+        installments: 1,
       });
     }
   }, [expense, reset]);
 
-  async function handleFormSubmit(values: ExpenseInput) {
-    const ok = await onSubmit(values);
-    if (ok) {
-      toast({ title: expense ? "Gasto atualizado" : "Gasto criado com sucesso" });
-      if (!expense) router.push("/expenses");
-    } else {
-      toast({ variant: "destructive", title: "Erro ao salvar gasto" });
-    }
-  }
-
   return (
     <Card>
       <CardContent className="pt-6">
+        {expense?.installmentTotal && expense.installmentTotal > 1 && (
+          <p className="mb-4 rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">
+            Parcela {expense.installmentNumber} de {expense.installmentTotal} — editar aqui altera
+            só esta parcela.
+          </p>
+        )}
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
@@ -103,7 +126,11 @@ export function ExpenseForm({ categories, expense, onSubmit, onCancel }: Expense
 
           <div className="space-y-2">
             <Label htmlFor="description">Descrição</Label>
-            <Input id="description" placeholder="Ex: Supermercado do mês" {...register("description")} />
+            <Input
+              id="description"
+              placeholder="Ex: Supermercado do mês"
+              {...register("description")}
+            />
             {errors.description && (
               <p className="text-xs text-destructive">{errors.description.message}</p>
             )}
@@ -157,6 +184,29 @@ export function ExpenseForm({ categories, expense, onSubmit, onCancel }: Expense
               />
             </div>
           </div>
+
+          {isNewCreditPurchase && (
+            <div className="space-y-2 rounded-md border border-dashed p-3">
+              <Label htmlFor="installments">Parcelas</Label>
+              <Input
+                id="installments"
+                type="number"
+                min="1"
+                max="48"
+                {...register("installments")}
+              />
+              {errors.installments && (
+                <p className="text-xs text-destructive">{errors.installments.message}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                {installments > 1
+                  ? `"Valor" acima é o total da compra. Serão criadas ${installments} parcelas de ${
+                      amount > 0 ? formatCurrency(amount / installments) : "—"
+                    } cada, uma por mês a partir da data informada.`
+                  : "Se for parcelado, aumente este número — o valor total será dividido automaticamente."}
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="notes">Observações (opcional)</Label>

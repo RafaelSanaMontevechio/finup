@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { expenseSchema } from "@/lib/validations/schemas";
-import { expensesService } from "@/features/expenses/services/expenses.service";
 import { requireUser } from "@/lib/api/require-user";
+import { expenseSchema } from "@/lib/validations/schemas";
 import { withApiErrorHandling } from "@/lib/api/with-error-handling";
+import { expensesService } from "@/features/expenses/services/expenses.service";
 
 export async function GET() {
   return withApiErrorHandling(async () => {

@@ -24,14 +24,17 @@ type State = { toasts: ToasterToast[] };
 const listeners: Array<(state: State) => void> = [];
 let memoryState: State = { toasts: [] };
 
-function dispatch(action: { type: "ADD"; toast: ToasterToast } | { type: "DISMISS"; toastId?: string } | { type: "REMOVE"; toastId?: string }) {
+function dispatch(
+  action:
+    | { type: "ADD"; toast: ToasterToast }
+    | { type: "DISMISS"; toastId?: string }
+    | { type: "REMOVE"; toastId?: string }
+) {
   if (action.type === "ADD") {
     memoryState = { toasts: [action.toast, ...memoryState.toasts].slice(0, TOAST_LIMIT) };
   } else if (action.type === "DISMISS" || action.type === "REMOVE") {
     memoryState = {
-      toasts: action.toastId
-        ? memoryState.toasts.filter((t) => t.id !== action.toastId)
-        : [],
+      toasts: action.toastId ? memoryState.toasts.filter((t) => t.id !== action.toastId) : [],
     };
   }
   listeners.forEach((listener) => listener(memoryState));

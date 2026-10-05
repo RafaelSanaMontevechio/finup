@@ -13,12 +13,20 @@ import { ExpenseTable } from "@/features/expenses/components/expense-table";
 import { toMonthKey } from "@/lib/utils/format";
 
 export function ExpensesListPage() {
-  const { expenses, allExpenses, loading, filters, setFilters, update, remove } =
-    useExpenses();
+  const {
+    expenses,
+    allExpenses,
+    loading,
+    filters,
+    setFilters,
+    update,
+    remove,
+    removeInstallmentsFrom,
+  } = useExpenses();
   const { categories } = useCategories();
 
-  const months = Array.from(new Set(allExpenses.map((e) => toMonthKey(e.date)))).sort(
-    (a, b) => (a < b ? 1 : -1)
+  const months = Array.from(new Set(allExpenses.map((e) => toMonthKey(e.date)))).sort((a, b) =>
+    a < b ? 1 : -1
   );
 
   return (
@@ -56,6 +64,7 @@ export function ExpensesListPage() {
               categories={categories}
               onUpdate={update}
               onDelete={remove}
+              onDeleteInstallmentsFrom={removeInstallmentsFrom}
             />
           )}
         </CardContent>

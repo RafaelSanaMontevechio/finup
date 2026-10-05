@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { loginSchema } from "@/lib/validations/schemas";
-import { signInWithEmailPassword } from "@/lib/firebase/auth-rest";
 import { createSession } from "@/lib/firebase/session";
+import { signInWithEmailPassword } from "@/lib/firebase/auth-rest";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();

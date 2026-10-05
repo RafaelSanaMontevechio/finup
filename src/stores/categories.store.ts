@@ -46,10 +46,7 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
   update: async (id, input) => {
     set({ error: null });
     try {
-      const updated = await apiClient.put<Category>(
-        `/api/categories/${id}`,
-        input
-      );
+      const updated = await apiClient.put<Category>(`/api/categories/${id}`, input);
       set({
         items: get().items.map((item) => (item.id === id ? updated : item)),
       });
