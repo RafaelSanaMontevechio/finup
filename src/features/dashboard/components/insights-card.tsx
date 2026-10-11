@@ -8,13 +8,17 @@ interface InsightsCardProps {
   averageTicket: number;
 }
 
-export function InsightsCard({ topCategory, mostFrequentCategory, averageTicket }: InsightsCardProps) {
+export function InsightsCard({
+  topCategory,
+  mostFrequentCategory,
+  averageTicket,
+}: InsightsCardProps) {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="p-3 md:p-4">
         <CardTitle>Resumo</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 text-sm">
+      <CardContent className="space-y-3 text-sm p-3 md:p-4">
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">Maior categoria de gasto</span>
           <span className="font-medium">

@@ -1,14 +1,17 @@
 "use client";
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import type { CategoryTotal } from "@/features/dashboard/utils/calculations";
+
 import { formatCurrency } from "@/lib/utils/format";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function ExpensesByCategoryChart({ data }: { data: CategoryTotal[] }) {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="p-3 md:p-4">
         <CardTitle>Gastos por categoria</CardTitle>
       </CardHeader>
       <CardContent>
@@ -25,7 +28,7 @@ export function ExpensesByCategoryChart({ data }: { data: CategoryTotal[] }) {
                 nameKey="name"
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
+                innerRadius={50}
                 outerRadius={90}
                 paddingAngle={2}
               >

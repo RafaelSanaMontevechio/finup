@@ -11,10 +11,10 @@ export function RecentLists({ recentExpenses, recentIncome }: RecentListsProps) 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card>
-        <CardHeader>
+        <CardHeader className="p-3 md:p-4">
           <CardTitle>Últimos 5 gastos</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-2 p-3 md:p-4">
           {recentExpenses.length === 0 && (
             <p className="text-sm text-muted-foreground">Nenhum gasto registrado.</p>
           )}
@@ -31,10 +31,10 @@ export function RecentLists({ recentExpenses, recentIncome }: RecentListsProps) 
       </Card>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="p-3 md:p-4">
           <CardTitle>Últimas 5 entradas</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-2 p-3 md:p-4">
           {recentIncome.length === 0 && (
             <p className="text-sm text-muted-foreground">Nenhuma entrada registrada.</p>
           )}

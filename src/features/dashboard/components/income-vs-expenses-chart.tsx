@@ -17,7 +17,7 @@ import { formatCurrency } from "@/lib/utils/format";
 export function IncomeVsExpensesChart({ data }: { data: MonthlyTotal[] }) {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="p-3 md:p-4">
         <CardTitle>Entradas vs Gastos por mês</CardTitle>
       </CardHeader>
       <CardContent>

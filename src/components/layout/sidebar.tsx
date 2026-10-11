@@ -47,14 +47,19 @@ function SidebarContent({
 
   return (
     <>
-      <div className="flex items-center justify-between px-4 py-4">
+      <div
+        className={cn(
+          "flex items-center px-4 py-4",
+          collapsed ? "justify-center" : "justify-between"
+        )}
+      >
         {!collapsed && (
           <span className="text-sm font-semibold tracking-tight">Controle Financeiro</span>
         )}
         {showToggle && (
           <button
             onClick={toggleSidebar}
-            className="rounded-md p-1.5 text-muted-foreground hover:bg-accent"
+            className="rounded-md  text-muted-foreground hover:bg-accent border"
             aria-label="Recolher menu"
           >
             {collapsed ? (
@@ -76,10 +81,11 @@ function SidebarContent({
               href={item.href}
               onClick={onNavigate}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "flex items-center justify-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors",
                 active
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                collapsed ? "justify-center" : "justify-start"
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -115,7 +121,7 @@ export function Sidebar() {
     <aside
       className={cn(
         "hidden h-screen flex-col border-r bg-card transition-all md:flex",
-        collapsed ? "w-16" : "w-60"
+        collapsed ? "w-14" : "w-60"
       )}
     >
       <SidebarContent collapsed={collapsed} showToggle />
