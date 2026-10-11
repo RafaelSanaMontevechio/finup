@@ -4,6 +4,10 @@ import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { useAuthStore } from "@/stores/auth.store";
 
+import { Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useUiStore } from "@/stores/ui.store";
+
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/expenses": "Gastos",
@@ -17,17 +21,28 @@ export function Header() {
   const user = useAuthStore((s) => s.user);
   const title = PAGE_TITLES[pathname] ?? "Controle Financeiro";
 
+  const setMobileSidebarOpen = useUiStore((s) => s.setMobileSidebarOpen);
+
   return (
     <header className="flex h-16 items-center justify-between border-b bg-card px-6">
-      <div>
-        <p className="text-xs text-muted-foreground">Início / {title}</p>
-        <h1 className="text-lg font-semibold">{title}</h1>
+      <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={() => setMobileSidebarOpen(true)}
+          aria-label="Abrir menu"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+        <div>
+          <p className="text-xs text-muted-foreground">Início / {title}</p>
+          <h1 className="text-lg font-semibold">{title}</h1>
+        </div>
       </div>
       <div className="flex items-center gap-4">
         {user && (
-          <span className="text-sm text-muted-foreground hidden sm:inline">
-            Olá, {user.name}
-          </span>
+          <span className="text-sm text-muted-foreground hidden sm:inline">Olá, {user.name}</span>
         )}
         <ThemeToggle />
       </div>
