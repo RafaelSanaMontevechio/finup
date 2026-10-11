@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useExpensesStore } from "@/stores/expenses.store";
 import type { PaymentMethod } from "@/types";
 
@@ -18,17 +18,13 @@ const DEFAULT_FILTERS: ExpenseFilters = {
   sortBy: "date-desc",
 };
 
+const PAGE_SIZE = 10;
+
 export function useExpenses() {
-  const { items, loading, error, refresh, create, update, remove } =
-    useExpensesStore();
+  const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<ExpenseFilters>(DEFAULT_FILTERS);
 
-  useEffect(() => {
-    if (items.length === 0) {
-      refresh();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { items, loading, error, refresh, create, update, remove } = useExpensesStore();
 
   const filtered = useMemo(() => {
     let list = [...items];
@@ -36,9 +32,7 @@ export function useExpenses() {
     if (filters.search.trim()) {
       const q = filters.search.trim().toLowerCase();
       list = list.filter(
-        (e) =>
-          e.description.toLowerCase().includes(q) ||
-          (e.notes ?? "").toLowerCase().includes(q)
+        (e) => e.description.toLowerCase().includes(q) || (e.notes ?? "").toLowerCase().includes(q)
       );
     }
 
@@ -67,8 +61,22 @@ export function useExpenses() {
     return list;
   }, [items, filters]);
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paged = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  const handlePagination = useCallback((page: number) => {
+    setCurrentPage(page < 1 ? 1 : page > totalPages ? totalPages : page);
+  }, []);
+
+  useEffect(() => {
+    if (items.length === 0) {
+      refresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return {
-    expenses: filtered,
+    expenses: paged,
     allExpenses: items,
     loading,
     error,
@@ -78,6 +86,9 @@ export function useExpenses() {
     remove,
     filters,
     setFilters,
+    totalPages,
+    currentPage,
+    handlePagination,
   };
 }
 

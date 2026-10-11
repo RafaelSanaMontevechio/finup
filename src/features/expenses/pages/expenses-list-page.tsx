@@ -2,23 +2,37 @@
 
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { AppShell } from "@/components/layout/app-shell";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useExpenses } from "@/features/expenses/hooks/use-expenses";
-import { useCategories } from "@/features/categories/hooks/use-categories";
-import { ExpenseFiltersBar } from "@/features/expenses/components/expense-filters";
-import { ExpenseTable } from "@/features/expenses/components/expense-table";
+
 import { toMonthKey } from "@/lib/utils/format";
 
+import { useExpenses } from "@/features/expenses/hooks/use-expenses";
+import { useCategories } from "@/features/categories/hooks/use-categories";
+import { ExpenseTable } from "@/features/expenses/components/expense-table";
+import { ExpenseFiltersBar } from "@/features/expenses/components/expense-filters";
+
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AppShell } from "@/components/layout/app-shell";
+import { Card, CardContent } from "@/components/ui/card";
+import { ExpanseCardList } from "../components/expense-card-list";
+
 export function ExpensesListPage() {
-  const { expenses, allExpenses, loading, filters, setFilters, update, remove } =
-    useExpenses();
+  const {
+    expenses,
+    allExpenses,
+    loading,
+    filters,
+    setFilters,
+    update,
+    remove,
+    totalPages,
+    currentPage,
+    handlePagination,
+  } = useExpenses();
   const { categories } = useCategories();
 
-  const months = Array.from(new Set(allExpenses.map((e) => toMonthKey(e.date)))).sort(
-    (a, b) => (a < b ? 1 : -1)
+  const months = Array.from(new Set(allExpenses.map((e) => toMonthKey(e.date)))).sort((a, b) =>
+    a < b ? 1 : -1
   );
 
   return (
@@ -27,7 +41,7 @@ export function ExpensesListPage() {
         <p className="text-sm text-muted-foreground">
           {allExpenses.length} gasto(s) registrado(s) no total.
         </p>
-        <Button asChild>
+        <Button asChild size="sm">
           <Link href="/expenses/new">
             <Plus className="mr-2 h-4 w-4" />
             Novo gasto
@@ -51,12 +65,28 @@ export function ExpensesListPage() {
               <Skeleton className="h-10 w-full" />
             </div>
           ) : (
-            <ExpenseTable
-              expenses={expenses}
-              categories={categories}
-              onUpdate={update}
-              onDelete={remove}
-            />
+            <>
+              <div className="block md:hidden">
+                <ExpanseCardList
+                  expenses={expenses}
+                  categories={categories}
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPaginate={handlePagination}
+                  onUpdate={update}
+                  onDelete={remove}
+                />
+              </div>
+
+              <div className="hidden md:block">
+                <ExpenseTable
+                  expenses={expenses}
+                  categories={categories}
+                  onUpdate={update}
+                  onDelete={remove}
+                />
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
