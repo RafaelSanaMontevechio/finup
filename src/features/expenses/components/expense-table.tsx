@@ -172,11 +172,11 @@ export function ExpenseTable({
       </Dialog>
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="w-full max-w-xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir gasto?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. O lançamento "{pendingDelete?.description}"
+              <p>Esta ação não pode ser desfeita.</p>O lançamento "{pendingDelete?.description}"
               {isInstallment
                 ? ` (parcela ${pendingDelete?.installmentNumber}/${pendingDelete?.installmentTotal})`
                 : ""}{" "}
